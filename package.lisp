@@ -13,4 +13,7 @@
 		:creation-source
 		:point-gps)
   (:export :watch-gpsd
-	   :watch-gpsd2))
+	   :start-gpsd
+	   :*location*
+	   :*gpsd-lock*
+	   :pp))
