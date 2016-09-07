@@ -10,6 +10,8 @@
 		:point-alt
 		:point-spd
 		:point-crs
+		:point-sats
+		:point-mode
 		:creation-time
 		:creation-source
 		:deg-to-cardinal-course
@@ -18,11 +20,14 @@
 	   :start-gpsd
 	   :get-current-location
 	   :pp
+	   :*gpsd-lock*
 	   :point-lat
 	   :point-lon
 	   :point-alt
 	   :point-spd
 	   :point-crs
+	   :point-sats
+	   :point-mode
 	   :point-creation-time
 	   :m-to-ft
 	   :ms-to-fs
