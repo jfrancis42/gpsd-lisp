@@ -1,11 +1,14 @@
 ;;;; gpsd.asd
 
 (asdf:defsystem #:gpsd
-  :description "Describe gpsd-lisp here"
-  :author "Your Name <your.name@example.com>"
-  :license "Specify license here"
+  :description "A Common Lisp client for reading GPSD data."
+  :author "Jeff Francis <jeff@gritch.org>"
+  :license "MIT, see file LICENSE"
   :depends-on (#:spot
-               #:aviation-formulary)
+               #:cl-json
+	       #:usocket
+               #:aviation-formulary
+	       #:local-time)
   :serial t
   :components ((:file "package")
                (:file "gpsd")))
