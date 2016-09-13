@@ -1,9 +1,24 @@
 # gpsd-lisp
 A Common Lisp client for reading GPSD data.
 
-GPSD is a daemon that sits between a physical GPS (or GLONASS) receiver and your software. It standardizes the format of GPS data so that no matter which proprietary (or semi-broken) standard your GPS receiver uses, you get a consistent usable output. It also allows multiple devices to share a single receiver, which is non-trivial when dealing with serial devices. This library brings the wonders of satellite navigation to your Common Lisp code. GPSD is available from (and documented at) http://catb.org/gpsd
+GPSD is a daemon that sits between a physical GPS (or GLONASS)
+receiver and your software. It standardizes the format of GPS data so
+that no matter which proprietary (or semi-broken) standard your GPS
+receiver uses, you get a consistent usable output. It also allows
+multiple devices to share a single receiver, which is non-trivial when
+dealing with serial devices. This library brings the wonders of
+satellite navigation to your Common Lisp code. GPSD is available from
+(and documented at) http://catb.org/gpsd
 
-The basic mode of operation of this library is to load the library, then kick off a thread that continuously monitors the GPSD daemon over a TCP connection, updating your location whenever new data is available.  The default is to connect to a GPSD server with the name "gpsd" on TCP port 2947.  If this does not match your setup, you will need to supply the appropriate parameters. Most people running GPSD simply run it on their local machine and bind only to localhost, or '127.0.0.1'.  To load the daemon and start the polling thread, do the following:
+The basic mode of operation of this library is to load the library,
+then kick off a thread that continuously monitors the GPSD daemon over
+a TCP connection, updating your location whenever new data is
+available.  The default is to connect to a GPSD running locally (ie,
+127.0.0.1) on TCP port 2947.  If this does not match your setup, you
+will need to supply the appropriate parameters. Most people running
+GPSD simply run it on their local machine and bind only to localhost,
+or '127.0.0.1'.  To load the daemon and start the polling thread, do
+the following:
 
 ```
 CL-USER> (ql:quickload :gpsd)
@@ -19,7 +34,21 @@ NIL
 CL-USER>
 ```
 
-The officially supported method for getting your current location is to call (get-current-location), which returns an object containing your location (as well as a great deal of other data). There's a handy convenience function called (pp) that displays much of this data nicely:
+The officially supported method for getting your current location is
+to call (get-current-location), which returns an object containing
+your location (as well as a great deal of other data). If the GPSD
+thread has not yet been started (start-gpsd), this function returns
+nil. If the thread has stopped, died, or crashed, it also returns
+nil. It's your responsibility to use the timestamp to ensure that the
+data you're receiving is current. If the GPSD daemon dies, this
+library continues to return the last known location, along with the
+timestamp of that last known location. The slowest GPS receiver I've
+seen in 10+ years reports at 0.5hz, so it's probably safe to assume
+that any timestamp more than five seconds old (being extremely
+conservative here) is probably invalid. There's a handy convenience
+function called (pp) that displays much of this data returned by the
+GPS nicely (though keep in mind that more data is available by
+accessing fields in the object directly):
 
 ```
 CL-USER> (gpsd:pp (gpsd:get-current-location))
@@ -55,9 +84,16 @@ CL-USER> (list (gpsd:point-lat (gpsd:get-current-location)) (gpsd:point-lon (gps
 CL-USER>
 ```
 
-Most of these fields are self-explanatory. point-sats gives the number of satellites that were part of the current fix (more is better) and point-mode refers to the mode the receiver is in (documented on the GPSD web site). The short version is that a value of '2' means the receiver is in 2D mode (no valid altitude) and '3' indicates 3D mode (altitude is valid). creation-time is a unix time_t timestamp.
+Most of these fields are self-explanatory. point-sats gives the number
+of satellites that were part of the current fix (more is better) and
+point-mode refers to the mode the receiver is in (documented on the
+GPSD web site). The short version is that a value of '2' means the
+receiver is in 2D mode (no valid altitude) and '3' indicates 3D mode
+(altitude is valid). creation-time is a unix time_t timestamp.
 
-GPSD reports all values in metric. Speed is reported in meters/second and altitude is in meters. There are convenience macros in the GPSD library for converting to other units:
+GPSD reports all values in metric. Speed is reported in meters/second
+and altitude is in meters. There are convenience macros in the GPSD
+library for converting to other units:
 
 * m-to-ft
 * ms-to-fs

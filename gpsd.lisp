@@ -3,7 +3,7 @@
 (in-package #:gpsd)
 
 (defparameter *gpsd-lock* (bt:make-lock))
-(defparameter *uptodate-thread* nil)
+(defparameter *gpsd-thread* nil)
 (defvar *location* nil)
 
 ;; meters to feet
@@ -96,15 +96,19 @@ updated."
 						:spd (cdr (assoc :speed json))
 						:crs (cdr (assoc :track json)))))))))))
 
-(defun start-gpsd (&optional (host "gpsd") (port 2947))
+(defun start-gpsd (&optional (host "127.0.0.1") (port 2947))
   "Start a thread that watches gpsd and constant updates the private
 local variable *location*.  Defaults to a gpsd server named 'gpsd' and
 TCP port 2947. If you're running the gpsd on the same machine this
 code is running on, the address should most likely be
 '127.0.0.1'."
-  (setf *uptodate-thread* (bt:make-thread (lambda () (up-to-dater host port)) :name "gpsd"))
+  (setf *gpsd-thread* (bt:make-thread (lambda () (up-to-dater host port)) :name "gpsd"))
   (format t "gpsd update thread is running...~%"))
 
 (defun get-current-location ()
   "The approved method of obtaining the current location."
-  (bt:with-lock-held (gpsd:*gpsd-lock*) gpsd::*location*))
+  (if *gpsd-thread*
+      (if (bt:thread-alive-p *gpsd-thread*)
+	  (bt:with-lock-held (gpsd:*gpsd-lock*) gpsd::*location*)
+	  nil)
+      nil))
