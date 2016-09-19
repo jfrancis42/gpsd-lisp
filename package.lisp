@@ -4,31 +4,36 @@
   (:use #:cl)
   (:import-from :aviation-formulary
 		:pp
-		:gps-point
+		:point-serial-number
+		:point-creation-time
+		:point-creation-source
+		:point-name
+		:point-description
 		:point-lat
 		:point-lon
+		:point-datum
 		:point-alt
-		:point-spd
-		:point-crs
-		:point-sats
-		:point-mode
-		:creation-time
-		:creation-source
-		:deg-to-cardinal-course
-		:point-gps)
+		:deg-to-cardinal-course)
   (:export :watch-gpsd
 	   :start-gpsd
 	   :get-current-location
 	   :pp
 	   :*gpsd-lock*
+	   :gps-point
+	   :point-serial-number
+	   :point-creation-time
+	   :point-creation-source
+	   :point-name
+	   :point-description
 	   :point-lat
 	   :point-lon
+	   :point-datum
 	   :point-alt
+	   :point-sats
+	   :point-signal-strength
+	   :point-mode
 	   :point-spd
 	   :point-crs
-	   :point-sats
-	   :point-mode
-	   :point-creation-time
 	   :m-to-ft
 	   :ms-to-fs
 	   :ms-to-fm
