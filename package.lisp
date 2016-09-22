@@ -4,6 +4,7 @@
   (:use #:cl)
   (:import-from :aviation-formulary
 		:pp
+		:maidenhead
 		:point-serial-number
 		:point-creation-time
 		:point-creation-source
@@ -17,7 +18,9 @@
   (:export :watch-gpsd
 	   :start-gpsd
 	   :get-current-location
+	   :get-current-sats
 	   :pp
+	   :maidenhead
 	   :*gpsd-lock*
 	   :gps-point
 	   :point-serial-number

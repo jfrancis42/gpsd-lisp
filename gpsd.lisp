@@ -11,6 +11,7 @@
 (defstruct other xdop ydop vdop tdop hdop gdop pdop)
 (defstruct sat prn az el ss used)
 (defparameter *location* (make-loc))
+(defparameter *curr-sats* nil)
 
 ;; meters to feet
 (defmacro m-to-ft (m) `(* ,m 3.28084))
@@ -132,6 +133,7 @@ updated."
 ;;	     ((equal "DEVICES" (cdr (assoc :class json)))
 ;;	      (print json))
 	     ((equal "SKY"  (cdr (assoc :class json)))
+	      (setf *curr-sats* (cdr (assoc :satellites json)))
 	      (setf (loc-sats *location*) (length (remove-if-not (lambda (n) (cdr (assoc :used n))) (cdr (assoc :satellites json)))))
 	      (setf (loc-ss  *location*) (* 1.0 (/ (apply '+ (mapcar (lambda (n) (if (cdr (assoc :used n)) (cdr (assoc :ss n)) 0)) (cdr (assoc :satellites json)))) (loc-sats *location*)))))
 	     ((equal "TPV" (cdr (assoc :class json)))
@@ -152,6 +154,10 @@ code is running on, the address should most likely be
 '127.0.0.1'."
   (setf *gpsd-thread* (bt:make-thread (lambda () (up-to-dater host port)) :name "gpsd"))
   (format t "gpsd update thread is running...~%"))
+
+(defun get-current-sats ()
+  "Get the current satellite info."
+  *curr-sats*)
 
 (defun get-current-location ()
   "The approved method of obtaining the current location."
