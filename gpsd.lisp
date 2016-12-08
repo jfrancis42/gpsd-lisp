@@ -147,11 +147,10 @@ updated."
 		(setf (loc-crs *location*) (cdr (assoc :track json))))))))))
 				     
 (defun start-gpsd (&optional (host "127.0.0.1") (port 2947))
-  "Start a thread that watches gpsd and constant updates the private
+  "Start a thread that watches gpsd and constantly updates the private
 local variable *location*.  Defaults to a gpsd server named 'gpsd' and
 TCP port 2947. If you're running the gpsd on the same machine this
-code is running on, the address should most likely be
-'127.0.0.1'."
+code is running on, the address should most likely be '127.0.0.1'."
   (setf *gpsd-thread* (bt:make-thread (lambda () (up-to-dater host port)) :name "gpsd"))
   (format t "gpsd update thread is running...~%"))
 
