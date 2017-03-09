@@ -80,7 +80,7 @@ Example:
 
 ```
 CL-USER> (list (gpsd:point-lat (gpsd:get-current-location)) (gpsd:point-lon (gpsd:get-current-location)))
-(41.23712541.237125 -111.53106)
+(41.237125 -111.53106)
 CL-USER>
 ```
 
