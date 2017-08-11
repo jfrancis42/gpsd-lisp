@@ -31,6 +31,11 @@
 ;; meters per second to nautical miles per hour
 (defmacro ms-to-kts (m) `(* ,m 1.94384))
 
+(defmacro cdr-assoc (name alist)
+  "Replaces '(cdr (assoc name alist))' because it's used a bajillion
+times when doing API stuff."
+  `(cdr (assoc ,name ,alist :test #'equal)))
+
 (defun socket-read (socket)
   "Read a line of data from a socket (blocking)."
   (read-line (usocket:socket-stream socket)))
@@ -79,7 +84,8 @@
   "Pretty print a GPS point."
   (format t "Name:  ~A~%" (point-name p))
   (format t "Descr:  ~A~%" (point-description p))
-  (format t "Time:  ~A~%" (local-time:unix-to-timestamp (point-creation-time p)))
+  (format t "Time:  ~A~%" (local-time:unix-to-timestamp
+			   (point-creation-time p)))
   (format t "Lat:  ~F~%" (point-lat p))
   (format t "Lon:  ~F~%" (point-lon p))
   (format t "Alt:  ~F~%" (point-alt p))
@@ -128,30 +134,46 @@ updated."
 	 (progn
 	   (setf json (json:decode-json-from-string (socket-read socket)))
 	   (cond
-;;	     ((equal "VERSION" (cdr (assoc :class json)))
+;;	     ((equal "VERSION" (cdr-assoc :class json))
 ;;	      (print json))
-;;	     ((equal "DEVICES" (cdr (assoc :class json)))
+;;	     ((equal "DEVICES" (cdr-assoc :class json))
 ;;	      (print json))
-	     ((equal "SKY"  (cdr (assoc :class json)))
-	      (setf *curr-sats* (cdr (assoc :satellites json)))
-	      (setf (loc-sats *location*) (length (remove-if-not (lambda (n) (cdr (assoc :used n))) (cdr (assoc :satellites json)))))
-	      (setf (loc-ss  *location*) (* 1.0 (/ (apply '+ (mapcar (lambda (n) (if (cdr (assoc :used n)) (cdr (assoc :ss n)) 0)) (cdr (assoc :satellites json)))) (loc-sats *location*)))))
-	     ((equal "TPV" (cdr (assoc :class json)))
+	     ((equal "SKY"  (cdr-assoc :class json))
+	      (setf *curr-sats* (cdr-assoc :satellites json))
+	      (setf (loc-sats *location*)
+		    (length
+		     (remove-if-not
+		      (lambda (n)
+			(cdr-assoc :used n))
+		      (cdr-assoc :satellites json))))
+	      (setf (loc-ss *location*)
+		    (* 1.0
+		       (/
+			(apply '+
+			       (mapcar
+				(lambda (n)
+				  (if (cdr-assoc :used n)
+				      (cdr-assoc :ss n)
+				      0))
+				(cdr-assoc :satellites json)))
+			(loc-sats *location*)))))
+	     ((equal "TPV" (cdr-assoc :class json))
 	      (bt:with-lock-held (*gpsd-lock*)
-		(setf (loc-time *location*) (cdr (assoc :time json)))
-		(setf (loc-mode *location*) (cdr (assoc :mode json)))
-		(setf (loc-lat *location*) (cdr (assoc :lat json)))
-		(setf (loc-lon *location*) (cdr (assoc :lon json)))
-		(setf (loc-alt *location*) (cdr (assoc :alt json)))
-		(setf (loc-spd *location*) (cdr (assoc :speed json)))
-		(setf (loc-crs *location*) (cdr (assoc :track json))))))))))
+		(setf (loc-time *location*) (cdr-assoc :time json))
+		(setf (loc-mode *location*) (cdr-assoc :mode json))
+		(setf (loc-lat *location*) (cdr-assoc :lat json))
+		(setf (loc-lon *location*) (cdr-assoc :lon json))
+		(setf (loc-alt *location*) (cdr-assoc :alt json))
+		(setf (loc-spd *location*) (cdr-assoc :speed json))
+		(setf (loc-crs *location*) (cdr-assoc :track json)))))))))
 				     
 (defun start-gpsd (&optional (host "127.0.0.1") (port 2947))
   "Start a thread that watches gpsd and constantly updates the private
 local variable *location*.  Defaults to a gpsd server named 'gpsd' and
 TCP port 2947. If you're running the gpsd on the same machine this
 code is running on, the address should most likely be '127.0.0.1'."
-  (setf *gpsd-thread* (bt:make-thread (lambda () (up-to-dater host port)) :name "gpsd"))
+  (setf *gpsd-thread*
+	(bt:make-thread (lambda () (up-to-dater host port)) :name "gpsd"))
   (format t "gpsd update thread is running...~%"))
 
 (defun get-current-sats ()
