@@ -2,6 +2,9 @@
 
 (in-package #:gpsd)
 
+;; It's 2017, for God's sake. Update the default!
+(setf *read-default-float-format* 'double-float)
+
 (defconstant point-gps 2)
 
 (defparameter *gpsd-lock* (bt:make-lock))
