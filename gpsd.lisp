@@ -198,3 +198,8 @@ code is running on, the address should most likely be '127.0.0.1'."
 		       :spd (loc-spd *location*)
 		       :crs (loc-crs *location*)))
       nil))
+
+;;; Local Variables:
+;;; mode: Lisp
+;;; coding: utf-8
+;;; End:
